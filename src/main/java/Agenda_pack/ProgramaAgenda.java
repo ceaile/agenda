@@ -53,23 +53,9 @@ public class ProgramaAgenda {
             String fechaNac = "";
             String website = "";
 
-            //new---------------------------------------------------------------
+            // IMPORTAR CONTACTOS
             File archivoAgenda = new File("agenda_existente.txt");
 
-            File copiaSeguridad = new File("copia_seguridad_agenda.txt");
-            FileWriter escritor = null;
-            if (copiaSeguridad.exists() && copiaSeguridad.isFile()) {
-                copiaSeguridad.delete();
-            } else {
-                if (copiaSeguridad.mkdir()) {
-                    escritor = new FileWriter(copiaSeguridad);
-                } else {
-                    throw new Exception("No ha podido crearse la copia de seguridad.");
-                }
-
-            }
-
-            // IMPORTAR CONTACTOS
             if (archivoAgenda.exists() && archivoAgenda.isFile()) {
                 Scanner lector = new Scanner(archivoAgenda, "UTF-8");
 
@@ -78,7 +64,7 @@ public class ProgramaAgenda {
                     String conceptos[] = linea.split(", ");
 
                     if (conceptos.length == 3) {
-                        if (ContactoPersona.fechaNacValida(conceptos[2])) {         // BUG: No admite la fecha como valida, aunque el programa funciona igualmente
+                        if (ContactoPersona.fechaNacValida(conceptos[2])) {
                             ContactoPersona nuevaPersona = new ContactoPersona(conceptos[0], conceptos[1], conceptos[2]);
                             agenda.añadirContacto(nuevaPersona);
                         } else {
@@ -91,13 +77,27 @@ public class ProgramaAgenda {
                 }
                 lector.close();
 
-                //probablemente todo el codigo antiguo deba estar ahora aqui...                
+                //probablemente todo el codigo antiguo deba estar ahora aqui...  ???              
             } else {
                 throw new Exception("La agenda existente no existe o no es un archivo de texto.");
             }
 
-            //fin new------------------------------------------------------------------
-            
+            //COPIAR ARCHIVO NORMAL EN COPIA SEGURIDAD, OTRO FILEWRITER
+            /*
+            queda
+             */
+            // CREAR COPIA DE SEGURIDAD
+            File copiaSeguridad = new File("copia_seguridad_agenda.txt");
+            FileWriter escritor = null;
+            if (copiaSeguridad.exists() && copiaSeguridad.isFile()) {
+                copiaSeguridad.delete();
+            } else {
+                escritor = new FileWriter(copiaSeguridad);
+                /*
+                queda
+                 */
+            }
+
             // MENU E INTERACCION CON USUARIO
             Scanner teclado = new Scanner(System.in);
             //SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy"); //formato de fecha español
@@ -160,6 +160,9 @@ public class ProgramaAgenda {
                                 ContactoPersona persona = new ContactoPersona(nombre, telefono, fechaNac);
                                 agenda.añadirContacto(persona);
                                 break;
+                                /*
+                                queda copiar en archivo, copiar en copia seguridad, cada vez que se haga y modifique contacto
+                                */
 
                             case '2': //empresa
                                 nombreValido = false;
@@ -276,8 +279,6 @@ public class ProgramaAgenda {
 
             } while (opcionElegida != '0');
 
-            escritor.close();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -288,22 +289,21 @@ public class ProgramaAgenda {
 //                               FUNCIONES
 //------------------------------------------------------------------------------
     /**
-     * Le pasamos el fileWriter que ya sabe donde escribir (en que archivo)
-     * y le pasamos las variables que vayamos a escribir.
-     * Añadimos comas y espacios.
-     * No importa mezclar contactos de Personas o Empresas porque al leer la copia
-     * el programa ya diferencia si se trata de fecha o una web y ya crea el contacto
-     * de manera diferente.
-     *      Queda ver cómo copiamos la copia en el original y borramos el que haya
-     * que borrar cada vez.
+     * Le pasamos el fileWriter que ya sabe donde escribir (en que archivo) y le
+     * pasamos las variables que vayamos a escribir. Añadimos comas y espacios.
+     * No importa mezclar contactos de Personas o Empresas porque al leer la
+     * copia el programa ya diferencia si se trata de fecha o una web y ya crea
+     * el contacto de manera diferente. Queda ver cómo copiamos la copia en el
+     * original y borramos el que haya que borrar cada vez.
+     *
      * @param escritor
      * @param nombre
      * @param telefono
      * @param fechaOweb
      * @throws Exception
-     * @return 
+     * @return
      */
-    public void escribirContacto(FileWriter escritor, String nombre, String telefono, String fechaOweb) throws Exception{
+    public void escribirContacto(FileWriter escritor, String nombre, String telefono, String fechaOweb) throws Exception {
         boolean escrito = false;
         escritor.write(nombre + ", " + telefono + ", " + fechaOweb + "\n");
     }

@@ -42,7 +42,7 @@ public class ContactoPersona extends Contacto {
             formatoFecha.parse(fechaNac);
             valido = true;
         } catch (ParseException ex) {
-            System.out.println("Esto no es una fecha válida");
+            
         }
         
         return valido;
