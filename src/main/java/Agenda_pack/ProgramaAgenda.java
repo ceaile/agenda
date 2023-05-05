@@ -36,7 +36,10 @@ import Agenda_pack.ContactoPersona;
 import Agenda_pack.AgendaContactos;
 import Agenda_pack.Contacto;
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.PrintStream;
 import java.text.ParseException;
 import java.util.Scanner;
 import java.util.Date;
@@ -82,32 +85,40 @@ public class ProgramaAgenda {
                 throw new Exception("La agenda existente no existe o no es un archivo de texto.");
             }
 
-            //COPIAR ARCHIVO NORMAL EN COPIA SEGURIDAD, OTRO FILEWRITER
-            /*
-            queda
-             */
-            // CREAR COPIA DE SEGURIDAD
+
+            // CREAR COPIA DE SEGURIDAD INICIAL
             File copiaSeguridad = new File("copia_seguridad_agenda.txt");
             FileWriter escritor = null;
             if (copiaSeguridad.exists() && copiaSeguridad.isFile()) {
                 copiaSeguridad.delete();
             } else {
                 escritor = new FileWriter(copiaSeguridad);
-                /*
-                queda
-                 */
+                Scanner lector = new Scanner(archivoAgenda, "UTF-8");
+                while (lector.hasNextLine()){
+                    String linea = lector.nextLine();
+                    escritor.write(linea + "\n");
+                }
+                lector.close();
             }
 
             // MENU E INTERACCION CON USUARIO
             Scanner teclado = new Scanner(System.in);
             //SimpleDateFormat formatoFecha = new SimpleDateFormat("dd/MM/yyyy"); //formato de fecha español
+            System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, "UTF-8"));
             System.out.println();
+            System.out.println("     *-------------*");
+            System.out.println("     | AGENDA 2023 |");
+            System.out.println("     |  By Celia   |");
+            System.out.println("     *-------------*");
+            System.out.println("");
             System.out.println("Bienvenido.");
             System.out.println("Seleccione una opcion:");
 
             char opcionElegida;
 
             do {
+
+                System.out.println("");
                 System.out.println("Pulse 1 para crear un contacto y añadirlo a la agenda.");
                 System.out.println("Pulse 2 para eliminar un contacto existente");
                 System.out.println("Pulse 3 para modificar datos de un contacto");
@@ -156,13 +167,12 @@ public class ProgramaAgenda {
                                     }
                                 }
 
-                                //CREAMOS CONTACTO Y AÑADIMOS A LA LISTA:
+                                //CREAMOS CONTACTO, AÑADIMOS A LA LISTA Y GUARDAMOS EN COPIA DE SEGURIDAD:
                                 ContactoPersona persona = new ContactoPersona(nombre, telefono, fechaNac);
                                 agenda.añadirContacto(persona);
+                                escribirContacto(escritor, nombre, telefono, fechaNac);
                                 break;
-                                /*
-                                queda copiar en archivo, copiar en copia seguridad, cada vez que se haga y modifique contacto
-                                */
+
 
                             case '2': //empresa
                                 nombreValido = false;
@@ -190,6 +200,10 @@ public class ProgramaAgenda {
                                     website = teclado.nextLine();
 
                                 }
+                                //CREAMOS CONTACTO, AÑADIMOS A LA LISTA Y GUARDAMOS EN COPIA DE SEGURIDAD:
+                                ContactoEmpresa empresa = new ContactoEmpresa(nombre, telefono, website);
+                                agenda.añadirContacto(empresa);
+                                escribirContacto(escritor, nombre, telefono, website);
                                 break;
                             case '0': //salir
                                 break;
@@ -198,7 +212,7 @@ public class ProgramaAgenda {
                         }
                         break;
 
-                    case '2':
+                    case '2': //eliminar contacto
                         boolean eliminacionValida = false;
 
                         while (eliminacionValida == false) {
@@ -209,6 +223,20 @@ public class ProgramaAgenda {
                                 eliminacionValida = true;
                             }
                         }
+                        //ELIMINAR CONTACTO DE COPIA DE SEGURIDAD
+                        Scanner lectorCopia = new Scanner(copiaSeguridad);
+                        while (lectorCopia.hasNextLine()){
+                            String linea = lectorCopia.nextLine();
+                            String trozos[] = linea.split(", ");
+                            if (trozos[0].equalsIgnoreCase(linea)){
+                                /*
+                                aqui me he quedado, tengo que borrar la linea de la copia de seguridad
+                                sustituyendo la linea por ""
+                                o copiar todo en otro documento menos esa linea y renombrarlo (?)
+                                */
+                            }
+                        }
+                        lectorCopia.close();
                         break;
 
                     case '3': //modificar datos de contacto
@@ -303,8 +331,7 @@ public class ProgramaAgenda {
      * @throws Exception
      * @return
      */
-    public void escribirContacto(FileWriter escritor, String nombre, String telefono, String fechaOweb) throws Exception {
-        boolean escrito = false;
+    static public void escribirContacto(FileWriter escritor, String nombre, String telefono, String fechaOweb) throws Exception {
         escritor.write(nombre + ", " + telefono + ", " + fechaOweb + "\n");
     }
 }
